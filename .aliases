@@ -68,9 +68,6 @@ alias psgrep="ps aux | grep -v grep | grep -i -e VSZ -e"
 alias psmem='ps auxf | sort -nr -k 4'
 alias pscpu='ps auxf | sort -nr -k 3'
 
-# merge new settings
-alias merge="xrdb -merge ~/.Xresources"
-
 #switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
@@ -91,3 +88,7 @@ alias gps='git push'		# push
 alias gst='git status'		# status
 alias gt='git tag'		# tag
 alias gts='git tag -s'		# signed tag
+
+# misc
+alias :q='exit'
+alias merge="xrdb -merge ~/.Xresources"
