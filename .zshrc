@@ -110,13 +110,10 @@ fi
 ### EXPORTS
 
 export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
-export EDITOR='vim'
 export HISTCONTROL=ignoreboth:erasedups
 export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history| cd -| cd ..)"
-export GPG_TTY=$(tty)
 export PAGER='less'
 export TERM='xterm-256color'
-export VISUAL='nvim'
 
 if [ -z "$XDG_CONFIG_HOME" ] ; then
 	export XDG_CONFIG_HOME="$HOME/.config"
@@ -128,19 +125,6 @@ fi
 
 if [ -z "$XDG_CACHE_HOME" ] ; then
 	export XDG_CACHE_HOME="$HOME/.cache"
-fi
-
-### PATH
-if [ -d "$HOME/.bin" ] ;
-	then PATH="$HOME/.bin:$PATH"
-fi
-
-if [ -d "$HOME/.bin/ascii-art" ]
-	then PATH="$HOME/.bin/ascii-art:$PATH"
-fi
-
-if [ -d "$HOME/.local/bin" ] ;
-	then PATH="$HOME/.local/bin:$PATH"
 fi
 
 ### OPTIONS
@@ -162,6 +146,7 @@ setopt NO_SHARE_HISTORY		# don't share history between sessions
 [[ $- != *i* ]] && return
 
 # Source external files
+[[ -f "$HOME/.zprofile" ]] && source "$HOME/.zprofile"
 [[ -f "$XDG_CONFIG_HOME/shell-common/aliases" ]] && . $XDG_CONFIG_HOME/shell-common/aliases
 [[ -f "$XDG_CONFIG_HOME/shell-common/lib-functions" ]] && . $XDG_CONFIG_HOME/shell-common/lib-functions
 
