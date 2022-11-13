@@ -109,6 +109,7 @@ fi
 
 ### EXPORTS
 
+export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
 export EDITOR='vim'
 export HISTCONTROL=ignoreboth:erasedups
 export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history| cd -| cd ..)"
