@@ -13,6 +13,10 @@ export PATH="$HOME/.bin:$PATH"
 export PATH="$HOME/.bin/ascii-art:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+# history
+export HISTCONTROL=ignoreboth:erasedups
+export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history| cd -| cd ..)"
+
 # terminal 
 export TERMINAL='alacritty'
 export TERM='xterm-256color'
@@ -23,6 +27,10 @@ export EDITOR='vim'
 
 # gpg
 export GPG_TTY="$(tty)"
+
+# misc
+export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
+export PAGER='less'
 
 # rust
 . "$HOME/.cargo/env"
