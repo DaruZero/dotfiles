@@ -156,37 +156,69 @@ setopt HIST_IGNORE_DUPS		# don't save duplicate commands in history
 setopt HIST_REDUCE_BLANKS	# remove superfluous blanks from commands in history
 setopt NO_SHARE_HISTORY		# don't share history between sessions
 
+### FUNCTIONS
+
+compress() {
+    if [[ -n "$1" ]]; then
+        local file=$1
+        shift
+        case "$file" in
+            *.tar ) tar cf "$file" "$*" ;;
+            *.tar.bz2 ) tar cjf "$file" "$*" ;;
+            *.tar.gz ) tar czf "$file" "$*" ;;
+            *.tgz ) tar czf "$file" "$*" ;;
+            *.zip ) zip "$file" "$*" ;;
+            *.rar ) rar "$file" "$*" ;;
+            * ) tar zcvf "$file.tar.gz" "$*" ;;
+        esac
+    else
+        echo 'usage: compress <foo.tar.gz> ./foo ./bar'
+    fi
+}
+
+# archive extract
+extract() {
+    if [[ -f "$1" ]] ; then
+        local filename=$(basename "$1")
+        local foldername=${filename%%.*}
+        local fullpath=$(perl -e 'use Cwd "abs_path";print abs_path(shift)' "$1")
+        local didfolderexist=false
+        if [[ -d "$foldername" ]]; then
+            didfolderexist=true
+            read -p "$foldername already exists, do you want to overwrite it? (y/n) " -n 1
+            echo
+            if [[ "$REPLY" =~ ^[Nn]$ ]]; then
+                return
+            fi
+        fi
+        mkdir -p "$foldername" && cd "$foldername"
+        case "$1" in
+            *.tar.bz2) tar xjf "$fullpath" ;;
+            *.tar.gz) tar xzf "$fullpath" ;;
+            *.tar.xz) tar Jxvf "$fullpath" ;;
+            *.tar.Z) tar xzf "$fullpath" ;;
+            *.tar) tar xf "$fullpath" ;;
+            *.taz) tar xzf "$fullpath" ;;
+            *.tb2) tar xjf "$fullpath" ;;
+            *.tbz) tar xjf "$fullpath" ;;
+            *.tbz2) tar xjf "$fullpath" ;;
+            *.tgz) tar xzf "$fullpath" ;;
+            *.txz) tar Jxvf "$fullpath" ;;
+            *.zip) unzip "$fullpath" ;;
+            *) echo "'$1' cannot be extracted via extract()" \
+                && cd .. \
+                && ! "$didfolderexist" \
+                && rm -r "$foldername" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
 ### MISC
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
-
-# # ex = EXtractor for all kinds of archives
-# # usage: ex <file>
-ex ()
-{
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1   ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
-      *.deb)       ar x $1      ;;
-      *.tar.xz)    tar xf $1    ;;
-      *.tar.zst)   tar xf $1    ;;
-      *)           echo "'$1' cannot be extracted via ex()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
 
 # Source external files
 [[ -f "$HOME/.aliases" ]] && . "$HOME"/.aliases
