@@ -5,7 +5,7 @@
 # | |__| / /__ 	https://github.com/DaruZero
 # |_____/_____|
 #
-#  My zsh config, nothing special
+# Zsh configuration
 
 
 ###########

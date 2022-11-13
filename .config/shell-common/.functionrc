@@ -5,7 +5,7 @@
 # | |__| / /__ 	https://github.com/DaruZero
 # |_____/_____|
 #
-#  Description
+# Useful functions
 
 # archive compress
 compress() {

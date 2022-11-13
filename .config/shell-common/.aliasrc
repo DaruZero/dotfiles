@@ -5,7 +5,7 @@
 # | |__| / /__ 	https://github.com/DaruZero
 # |_____/_____|
 #
-# My aliases
+# Collection of aliases
 
 # list
 alias ls='exa -alh --icons --color=always --group-directories-first'

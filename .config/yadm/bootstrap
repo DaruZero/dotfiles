@@ -1,4 +1,12 @@
 #!/bin/bash
+#  _____ ______
+# |  __ \___  /	Matteo 'DaruZero' Danelon
+# | |  | | / / 	
+# | |  | |/ /  	https://matteodanelon.com
+# | |__| / /__ 	https://github.com/DaruZero
+# |_____/_____|
+#
+# yadm bootstrap
 
 # Save this file as ~/.config/yadm/bootstrap and make it executable. It will
 # execute all executable files (excluding templates and editor backups) in the
