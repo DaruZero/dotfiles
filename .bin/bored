@@ -1,0 +1,47 @@
+#! /bin/bash
+
+if command -v sl &> /dev/null
+then
+    cmd_list+=("sl")
+fi
+
+if command -v fortune &> /dev/null && ! command -v cowsay &> /dev/null
+then
+    cmd_list+=("fortune")
+fi
+
+if command -v cmatrix &> /dev/null
+then
+    cmd_list+=("cmatrix")
+fi
+
+if command -v oneko &> /dev/null
+then
+    cmd_list+=("oneko")
+fi
+
+if command -v toilet &> /dev/null
+then
+    cmd_list+=("toilet")
+fi
+
+# if command -v aafire &> /dev/null
+# then
+#     cmd_list+=("aafire")
+# fi
+
+if command -v asciiquarium &> /dev/null
+then
+    cmd_list+=("asciiquarium")
+fi
+
+length_cmd_list=${#cmd_list[@]}
+
+if [ "${#cmd_list[@]}" -eq 0 ]; then
+    echo "too bored.."
+    exit
+fi
+
+declare -i random_index=$RANDOM%$length_cmd_list
+exec "${cmd_list[$random_index]}"
+exit
