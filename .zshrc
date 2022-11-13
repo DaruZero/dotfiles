@@ -78,10 +78,10 @@ plugins=(
 [[ $- != *i* ]] && return
 
 # Aliases
-[[ -f "$XDG_CONFIG_HOME/shell-common/aliases" ]] && . $XDG_CONFIG_HOME/shell-common/aliases
+[[ -f "$XDG_CONFIG_HOME/shell-common/.aliasrc" ]] && . $XDG_CONFIG_HOME/shell-common/.aliasrc
 
 # Common functions
-[[ -f "$XDG_CONFIG_HOME/shell-common/lib-functions" ]] && . $XDG_CONFIG_HOME/shell-common/lib-functions
+[[ -f "$XDG_CONFIG_HOME/shell-common/.functionrc" ]] && . $XDG_CONFIG_HOME/shell-common/.functionrc
 
 # Fetch 
 # neofetch
