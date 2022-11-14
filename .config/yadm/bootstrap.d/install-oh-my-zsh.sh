@@ -1,3 +1,4 @@
+#! /bin/sh
 #  _____ ______
 # |  __ \___  /	Matteo 'DaruZero' Danelon
 # | |  | | / / 	
