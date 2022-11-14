@@ -68,16 +68,19 @@ extract() {
 # local backup
 bak() {
 	if [[ -e "$1" ]]; then
-		cp "$1" "$1.bak"
-		echo "Backed $1 to $1.bak"
+        if [[ -e "$1.bak" ]]; then
+            bak $1.bak
+        fi
+        command cp "$1" "$1.bak"
+        echo "Backed $1 to $1.bak"
 	fi
 }
 
 # restore local backup
 resbak() {
 	if [[ -e "$1" && $1 == *.bak ]]; then
-		local filename=$(echo $1 | sed 's/.bak//') 
-		cp "$1" $filename
+		local filename=$(echo $1 | sed 's/.bak//g') 
+		command cp "$1" $filename
 		echo "Restored $1 into $filename"
 	fi
 }
