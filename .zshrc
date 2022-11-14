@@ -29,6 +29,8 @@ ENABLE_CORRECTION="true"
 # COMPLETION_WAITING_DOTS="true"
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 # HIST_STAMPS="mm/dd/yyyy"
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
 
 setopt AUTO_CD			# automatically use cd when the command is the name of a directory
 setopt NO_CASE_GLOB		# globbing case insensitive
@@ -41,6 +43,7 @@ setopt HIST_IGNORE_DUPS		# don't save duplicate commands in history
 setopt HIST_REDUCE_BLANKS	# remove superfluous blanks from commands in history
 setopt NO_SHARE_HISTORY		# don't share history between sessions
 
+bindkey -e
 
 #############
 #  PROFILE  #
@@ -62,6 +65,9 @@ plugins=(
 	git
 	web-search
 )
+
+# Completions
+[[ -f $ZSH_CONFIG/completion.zsh ]] && source $ZSH_CONFIG/completion.zsh
 
 # Oh-My-Zsh
 [[ -f $ZSH/oh-my-zsh.sh ]] && source $ZSH/oh-my-zsh.sh
