@@ -8,6 +8,8 @@
 #
 # Install oh-my-zsh
 
-if ! [[ -d $HOME/.oh-my-zsh ]];
-        then sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+if ! [[ -d $HOME/.oh-my-zsh ]]; then
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    command mv $HOME/.zshrc.pre-oh-my-zsh $HOME.zshrc
 fi
+
