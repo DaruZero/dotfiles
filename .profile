@@ -38,4 +38,9 @@ export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
 export PAGER='less'
 
 # rust
-. "$HOME/.cargo/env"
+[[ -e $HOME/.cargo ]] && 
+    . "$HOME/.cargo/env"
+
+# snap
+[[ -x "$(command -v snap)" ]] && 
+    export PATH="/snap/bin:$PATH"
