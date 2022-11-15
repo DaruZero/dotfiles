@@ -8,7 +8,7 @@
 #
 # Install oh-my-zsh
 
-local log='[11-install-oh-my-zsh]:'
+log='[11-install-oh-my-zsh]:'
 echo "$log start script"
 
 # if not existing execute install script and restore original .zshrc

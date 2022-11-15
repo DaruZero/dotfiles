@@ -8,7 +8,7 @@
 #
 # yadm submodules init
 
-local log='[00-init-submoduels.sh]:'
+log='[00-init-submoduels.sh]:'
 echo "$log start script"
 
 cd "$HOME"
