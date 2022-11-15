@@ -8,6 +8,9 @@
 #
 # Install oh-my-zsh
 
+local log='[11-install-oh-my-zsh]:'
+echo "$log start script"
+
 # if not existing execute install script and restore original .zshrc
 if [ ! -d $HOME/.oh-my-zsh ]; then
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

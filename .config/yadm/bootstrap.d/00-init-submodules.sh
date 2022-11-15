@@ -8,6 +8,10 @@
 #
 # yadm submodules init
 
+local log='[00-init-submoduels.sh]:'
+echo "$log start script"
+
 cd "$HOME"
 
+echo "$log update submodules"
 yadm submodule update --recursive --init
