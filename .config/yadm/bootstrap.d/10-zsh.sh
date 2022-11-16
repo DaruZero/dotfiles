@@ -7,26 +7,29 @@
 #
 # Install zsh and make it default
 
-log='[10-zsh.sh]:'
-echo "$log start script"
+log(){
+    local script='[10-zsh.sh]:'
+    echo "\033[0;36m$script $1\033[0m"
+}
+log "start script"
 
 # define package manager to use depending on distribution family
-echo "$log determine which package manager to use"
+log "determine which package manager to use"
 if [[ $DISTRO_FAMILY == 'arch' ]]; then
-    echo "$log found pacman"
+    log "$pacman"
     package_manager="sudo pacman -S"
 elif [[ $DISTRO_FAMILY == 'debian' ]]; then
-    echo "$log found apt-get"
+    log "found apt-get"
     package_manager="sudo apt-get install"
 else
-    echo "distro family not recognized"
+    log "distro family not recognized"
     exit 1
 fi
 
 # install zsh if not already installed
-echo "$log install zsh"
+log "install zsh"
 ! [[ -x "$(command -v zsh)" ]] && 
     command $package_manager zsh
 
-echo "$log change default shell"
+log "change default shell"
 chsh -s $(which zsh)
