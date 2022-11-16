@@ -13,6 +13,9 @@ log(){
 }
 log "start script"
 
+log "determine distribution family"
+DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
+
 # define package manager to use depending on distribution family
 log "determine which package manager to use"
 if [[ $DISTRO_FAMILY == 'arch' ]]; then
