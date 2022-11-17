@@ -22,13 +22,13 @@ log "determine which package manager to use"
 case $DISTRO_FAMILY in
     "arch") 
         log "found pacman"
-        package_manager="sudo pacman -S";;
+        package_manager="sudo pacman -S --noconfirm";;
     "debian") 
         log "found apt-get"
-        package_manager="sudo apt-get install";;
+        package_manager="sudo apt-get -y install";;
     "ubuntu") 
         log "found apt-get"
-        package_manager="sudo apt-get install";;
+        package_manager="sudo apt-get -y install";;
     *)
     log "distro family not recognized"
     exit 1;;
