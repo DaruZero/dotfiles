@@ -35,7 +35,8 @@ case $DISTRO_FAMILY in
 esac
 
 # install zsh if not already installed
-if [ "${'zsh'#$0}" != "$0" ]
+shell="zsh"
+if [ "${shell#$0}" != "$0" ]
 then
     log "install zsh"
     command $package_manager zsh
