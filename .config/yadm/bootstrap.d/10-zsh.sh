@@ -19,10 +19,10 @@ DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
 
 # define package manager to use depending on distribution family
 log "determine which package manager to use"
-if [[ $DISTRO_FAMILY == 'arch' ]]; then
+if [ $DISTRO_FAMILY == 'arch' ]; then
     log "$pacman"
     package_manager="sudo pacman -S"
-elif [[ $DISTRO_FAMILY == 'debian' ]]; then
+elif [ $DISTRO_FAMILY == 'debian' ]; then
     log "found apt-get"
     package_manager="sudo apt-get install"
 else
