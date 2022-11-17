@@ -21,3 +21,5 @@ if [ ! -d $HOME/.oh-my-zsh ]; then
     log "restoring .zshrc"
     command mv $HOME/.zshrc.pre-oh-my-zsh $HOME.zshrc
 fi
+
+log "\033[0;32mdone"

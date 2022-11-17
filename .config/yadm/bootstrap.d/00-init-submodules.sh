@@ -18,3 +18,5 @@ cd "$HOME"
 
 log "update submodules"
 yadm submodule update --recursive --init
+
+log "\033[0;32mdone"

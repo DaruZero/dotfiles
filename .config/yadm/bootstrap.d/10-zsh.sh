@@ -45,3 +45,5 @@ fi
 
 log "change default shell"
 chsh -s $(which zsh)
+
+log "\033[0;32mdone"
