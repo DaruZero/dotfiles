@@ -23,7 +23,10 @@ case $DISTRO_FAMILY in
     "arch") 
         log "found pacman"
         package_manager="sudo pacman -S";;
-    "debian" "ubuntu") 
+    "debian") 
+        log "found apt-get"
+        package_manager="sudo apt-get install";;
+    "ubuntu") 
         log "found apt-get"
         package_manager="sudo apt-get install";;
     *)
