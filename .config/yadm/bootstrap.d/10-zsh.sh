@@ -15,7 +15,7 @@ log(){
 log "start script"
 
 log "determine distribution family"
-DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
+DISTRO_FAMILY=$(grep -e '^ID=' /etc/os-release | sed 's/ID=//g')
 
 # define package manager to use depending on distribution family
 log "determine which package manager to use"
@@ -23,7 +23,7 @@ case $DISTRO_FAMILY in
     "arch") 
         log "found pacman"
         package_manager="sudo pacman -S";;
-    "debian") 
+    "debian" "ubuntu") 
         log "found apt-get"
         package_manager="sudo apt-get install";;
     *)
