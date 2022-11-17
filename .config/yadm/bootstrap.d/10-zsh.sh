@@ -19,21 +19,26 @@ DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
 
 # define package manager to use depending on distribution family
 log "determine which package manager to use"
-if [ $DISTRO_FAMILY == 'arch' ]; then
-    log "$pacman"
-    package_manager="sudo pacman -S"
-elif [ $DISTRO_FAMILY == 'debian' ]; then
-    log "found apt-get"
-    package_manager="sudo apt-get install"
-else
+case $DISTRO_FAMILY in
+    "arch") 
+        log "found pacman"
+        package_manager="sudo pacman -S";;
+    "debian") 
+        log "found apt-get"
+        package_manager="sudo apt-get install";;
+    *)
     log "distro family not recognized"
-    exit 1
-fi
+    exit 1;;
+esac
 
 # install zsh if not already installed
-log "install zsh"
-! [[ -x "$(command -v zsh)" ]] && 
+if [ "${'zsh'#$0}" != "$0" ]
+then
+    log "install zsh"
     command $package_manager zsh
+else
+    log "zsh already installed"
+fi
 
 log "change default shell"
 chsh -s $(which zsh)
