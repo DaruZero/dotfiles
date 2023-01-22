@@ -44,3 +44,10 @@ export PAGER='less'
 # snap
 [[ -x "$(command -v snap)" ]] && 
     export PATH="/snap/bin:$PATH"
+
+# Change keyboard layout for specific keyboards
+apex_m750=$(
+	xinput list |
+	sed -n 's/.*Apex M750.*id=\([0-9]*\).*keyboard.*/\1/p'
+)
+[ ! -z "$apex_m750+x" ] && setxkbmap -device $apex_m750 -layout us,it -variant intl, -option grp:ctrl_shift_toggle
