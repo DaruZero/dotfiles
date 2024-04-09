@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#! /usr/bin/env bash
 #  _____ ______
 # |  __ \___  /	Matteo 'DaruZero' Danelon
 # | |  | | / /
@@ -11,6 +11,13 @@
 DEV_DIR="$HOME/dev/DaruZero"
 DISTRO=""
 PKG_MGR=""
+FILES=(
+  ".zshrc"
+  ".zprofile"
+  ".profile"
+  ".config/zsh"
+  ".config/shell-common"
+)
 
 info() {
   file_name=$(basename "$0")
@@ -30,55 +37,64 @@ fatal() {
   exit 1
 }
 
-checkdeps() {
-  deps="$1"
-  for dep in $deps; do
-    if ! command -v "$dep" >/dev/null 2>&1; then
-      error "$dep is required but it's not installed. Aborting."
-      exit 1
-    fi
-  done
-}
-
 installdeps() {
-  deps="$1"
+  local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
-      info "\t └ Installing $dep..."
+      info "Installing $dep..."
       $PKG_MGR "$dep"
     fi
   done
 }
 
+installdeps_aur() {
+  local deps="$1"
+  for dep in $deps; do
+    if ! command -v "$dep" >/dev/null 2>&1; then
+      info "Installing $dep..."
+      paru -S "$dep"
+    fi
+  done
+}
 
-determine_distro() {
+detect_distro() {
+  local distro_var="$1"
   if [ -f /etc/os-release ]; then
-    DISTRO=$(grep -e '^ID=' /etc/os-release | sed 's/ID=//g')
-    info "  > Detected distribution family: $DISTRO"
-  else
-    fatal "Cannot determine distribution family. Aborting."
+    DISTRO=$(grep -e "^$distro_var=" /etc/os-release | cut -d'=' -f2-)
+    if [ -n "$DISTRO" ]; then
+      info "Detected distribution family: $DISTRO"
+      case $DISTRO in
+      "arch")
+        PKG_MGR="sudo pacman -S --noconfirm"
+        ;;
+      "debian" | "ubuntu")
+        PKG_MGR="sudo apt-get -y install"
+        ;;
+      "fedora")
+        PKG_MGR="sudo dnf -y install"
+        ;;
+      "alpine")
+        PKG_MGR="sudo apk add"
+        ;;
+      *)
+        error "Distribution family $DISTRO not supported"
+        return 1
+        ;;
+      esac
+      return 0
+    fi
+    warn "Cannot determine distribution family from $distro_var in /etc/os-release"
+    return 1
   fi
 
-  case $DISTRO in
-    "arch")
-      PKG_MGR="sudo pacman -S --noconfirm"
-      ;;
-    "debian")
-      PKG_MGR="sudo apt-get -y install"
-      ;;
-    "ubuntu")
-      PKG_MGR="sudo apt-get -y install"
-      ;;
-    "fedora")
-      PKG_MGR="sudo dnf -y install"
-      ;;
-    "alpine")
-      PKG_MGR="sudo apk add"
-      ;;
-    *)
-      fatal "Distribution family $DISTRO not supported. Aborting."
-      ;;
-  esac
+  fatal "Cannot determine distribution family. Aborting."
+}
+
+backup() {
+  if [ -f "$1" ] || [ -d "$1" ]; then
+    info "Backing up $1 to $1.bak"
+    mv "$1" "$1.bak"
+  fi
 }
 
 # Ask for the administrator password upfront
@@ -86,14 +102,40 @@ determine_distro() {
 
 info "Starting script"
 
-info "Checking dependencies"
-checkdeps "git"
+info "Detecting distribution family"
+detect_distro "ID" || {
+  # arcolinux uses ID_LIKE instead of ID
+  detect_distro "ID_LIKE" || {
+    fatal "Failed to determine distribution family."
+  }
+}
+
+info "Installing dependencies"
+installdeps "git zsh"
+
+# shellcheck disable=SC2154
+if [ "$DISTRO" = "arch" ]; then
+  info "Installing arch-specific dependencies"
+
+  # add arcolinux_repo_3party to pacman.conf
+  if ! grep -q "arcolinux_repo_3party" /etc/pacman.conf; then
+    info "Adding arcolinux_repo_3party to pacman.conf"
+    sudo tee -a /etc/pacman.conf <<EOF
+[arcolinux_repo_3party]
+SigLevel = PackageRequired DatabaseNever
+Server = https://arcolinux.github.io/arcolinux_repo_3party/$arch
+EOF
+
+    sudo pacman -Syy
+  fi
+
+  installdeps "paru yay"
+fi
 
 info "Checking dotfiles repository"
 if [ ! -d "$DEV_DIR/dotfiles" ]; then
   info "Dotfiles repository does not exist"
   info "Cloning..."
-
   git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null
 else
   info "Dotfiles repository already exists"
@@ -110,12 +152,6 @@ else
   fi
 fi
 
-info "Detecting distribution family"
-determine_distro
-
-info "Installing dependencies"
-installdeps "bash zsh"
-
 info "Changing default shell to zsh"
 if [ "$SHELL" != "$(which zsh)" ]; then
   info "Changing default shell to zsh"
@@ -126,10 +162,25 @@ fi
 
 info "Installing oh-my-zsh"
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  info "Downloading and running install script"
-  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  info "Restoring .zshrc"
-  command mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
+  if [ "$DISTRO" = "arch" ]; then
+    installdeps "oh-my-zsh-git"
+  else
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
+  fi
 else
   info "oh-my-zsh already installed"
 fi
+
+info "Backing up existing configuration files"
+for file in "${FILES[@]}"; do
+  backup "$file"
+done
+
+info "Creating symlinks"
+for file in "${FILES[@]}"; do
+  info "Creating symlink for $file"
+  ln -s "$DEV_DIR/dotfiles/$file" "$HOME/$file"
+done
+
+info "Done"
