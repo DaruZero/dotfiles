@@ -182,7 +182,7 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   if [ "$DISTRO" = "arch" ]; then
     installdeps "oh-my-zsh-git"
   else
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     if [ -f "$HOME/.zshrc.pre-oh-my-zsh" ]; then
       mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
     fi
