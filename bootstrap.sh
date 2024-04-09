@@ -98,7 +98,7 @@ backup() {
 }
 
 # Ask for the administrator password upfront
-# sudo -v
+sudo -v
 
 info "Starting script"
 
