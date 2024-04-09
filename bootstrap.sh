@@ -15,8 +15,8 @@ FILES=(
   ".zshrc"
   ".zprofile"
   ".profile"
-  ".config/zsh"
-  ".config/shell-common"
+  ".config/zsh/*"
+  ".config/shell-common/*"
 )
 
 info() {
@@ -88,6 +88,30 @@ detect_distro() {
   fi
 
   fatal "Cannot determine distribution family. Aborting."
+}
+
+create_symlinks() {
+  local file
+
+  for file in "${FILES[@]}"; do
+    local destination="$HOME/${file}"
+    local dirname
+    dirname="$(dirname "$destination")"
+
+    # Create directories if they don't exist
+    mkdir -p "$dirname"
+
+    # Expand wildcards (if any)
+    if [[ "$file" == *"*"* ]]; then
+      for source_file in $file; do
+        info "Creating symlink for $source_file"
+        ln -sb "$(realpath "$source_file")" "$destination"
+      done
+    else
+      info "Creating symlink for $file"
+      ln -sb "$(realpath "$file")" "$destination"
+    fi
+  done
 }
 
 # Ask for the administrator password upfront
@@ -168,9 +192,6 @@ else
 fi
 
 info "Creating symlinks"
-for file in "${FILES[@]}"; do
-  info "Creating symlink for $file"
-  ln -bs "$DEV_DIR/dotfiles/$file" "$HOME/$file"
-done
+create_symlinks
 
 info "Done"
