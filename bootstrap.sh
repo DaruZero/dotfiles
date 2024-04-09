@@ -90,13 +90,6 @@ detect_distro() {
   fatal "Cannot determine distribution family. Aborting."
 }
 
-backup() {
-  if [ -f "$1" ] || [ -d "$1" ]; then
-    info "Backing up $1 to $1.bak"
-    mv "$1" "$1.bak"
-  fi
-}
-
 # Ask for the administrator password upfront
 sudo -v
 
@@ -166,21 +159,18 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     installdeps "oh-my-zsh-git"
   else
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-    mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
+    if [ -f "$HOME/.zshrc.pre-oh-my-zsh" ]; then
+      mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
+    fi
   fi
 else
   info "oh-my-zsh already installed"
 fi
 
-info "Backing up existing configuration files"
-for file in "${FILES[@]}"; do
-  backup "$file"
-done
-
 info "Creating symlinks"
 for file in "${FILES[@]}"; do
   info "Creating symlink for $file"
-  ln -s "$DEV_DIR/dotfiles/$file" "$HOME/$file"
+  ln -bs "$DEV_DIR/dotfiles/$file" "$HOME/$file"
 done
 
 info "Done"
