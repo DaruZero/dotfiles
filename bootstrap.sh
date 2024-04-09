@@ -37,6 +37,8 @@ fatal() {
   exit 1
 }
 
+# TODO: add function to check if a command was successful
+
 installdeps() {
   local deps="$1"
   for dep in $deps; do
@@ -114,6 +116,8 @@ create_symlinks() {
   done
 }
 
+# TODO: move logic to functions
+
 # Ask for the administrator password upfront
 sudo -v
 
@@ -130,6 +134,7 @@ detect_distro "ID" || {
 info "Installing dependencies"
 installdeps "git zsh"
 
+# TODO: fix this step. arcolinux repo doesn't work
 # shellcheck disable=SC2154
 if [ "$DISTRO" = "arch" ]; then
   info "Installing arch-specific dependencies"
