@@ -64,7 +64,7 @@ installdeps() {
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       info "Installing $dep..."
-      $PKG_MGR "$dep"
+      $PKG_MGR "$dep" || fatal "Failed to install $dep. Aborting."
     fi
   done
 }
@@ -74,7 +74,7 @@ installdeps_aur() {
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       info "Installing $dep..."
-      paru -S "$dep"
+      paru -S "$dep" || fatal "Failed to install $dep. Aborting."
     fi
   done
 }
@@ -118,17 +118,17 @@ create_symlinks() {
     dirname="$(dirname "$destination")"
 
     # Create directories if they don't exist
-    mkdir -p "$dirname"
+    mkdir -p "$dirname" || fatal "Failed to create directory $dirname"
 
     # Expand wildcards (if any)
     if [[ "$file" == *"*"* ]]; then
       for source_file in $file; do
         info "Creating symlink for $source_file"
-        ln -sb "$(realpath "$source_file")" "$destination"
+        ln -sb "$(realpath "$source_file")" "$destination" || fatal "Failed to create symlink for $source_file"
       done
     else
       info "Creating symlink for $file"
-      ln -sb "$(realpath "$file")" "$destination"
+      ln -sb "$(realpath "$file")" "$destination" || fatal "Failed to create symlink for $file"
     fi
   done
 }
@@ -158,16 +158,16 @@ if [ "$DISTRO" = "arch" ]; then
   else
     if ! command -v yay >/dev/null 2>&1; then
       info "Installing yay"
-      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay"
-      cd "/opt/yay" || exit
-      sudo makepkg -si --noconfirm
+      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
+      cd "/opt/yay" || fatal "Failed to change directory to /opt/yay. Aborting."
+      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
     fi
 
     if ! command -v paru >/dev/null 2>&1; then
       info "Installing paru"
-      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru"
-      cd "/opt/paru" || exit
-      sudo makepkg -si --noconfirm
+      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
+      cd "/opt/paru" || fatal "Failed to change directory to /opt/paru. Aborting."
+      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
     fi
   fi
 fi
@@ -176,7 +176,7 @@ info "Checking dotfiles repository"
 if [ ! -d "$DEV_DIR/dotfiles" ]; then
   info "Dotfiles repository does not exist"
   info "Cloning..."
-  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null
+  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null || fatal "Failed to clone dotfiles repository. Aborting."
 else
   info "Dotfiles repository already exists"
   info "Updating..."
@@ -184,18 +184,14 @@ else
   cd "$DEV_DIR/dotfiles" || exit
 
   ## Try to checkout main branch and pull changes. If it fails, or there are uncommitted changes, error out.
-  if ! (git checkout main >/dev/null); then
-    fatal "Failed to update dotfiles repository. Aborting."
-  fi
-  if ! (git pull >/dev/null); then
-    fatal "Failed to update dotfiles repository. Aborting."
-  fi
+  git checkout main >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
+  git pull >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
 fi
 
 info "Changing default shell to zsh"
 if [ "$SHELL" != "$(which zsh)" ]; then
   info "Changing default shell to zsh"
-  sudo chsh -s "$(which zsh)" "$USER"
+  sudo chsh -s "$(which zsh)" "$USER" || fatal "Failed to change default shell to zsh. Aborting."
 else
   info "Default shell is already zsh"
 fi
@@ -205,10 +201,8 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   if [ "$DISTRO" = "arcolinux" ]; then
     installdeps "oh-my-zsh-git"
   else
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-    if [ -f "$HOME/.zshrc.pre-oh-my-zsh" ]; then
-      mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc"
-    fi
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || fatal "Failed to install oh-my-zsh. Aborting."
+    mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc" || warn "No .zshrc.pre-oh-my-zsh file found. Skipping."
   fi
 else
   info "oh-my-zsh already installed"
