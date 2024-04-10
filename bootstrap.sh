@@ -8,6 +8,10 @@
 #
 # Bootstrap script for my dotfiles repository.
 
+################################################################################
+# VARIABLES
+################################################################################
+
 DEV_DIR="$HOME/dev/DaruZero"
 DISTRO=""
 PKG_MGR=""
@@ -19,39 +23,45 @@ FILES=(
   ".config/shell-common/*"
 )
 
-info() {
+################################################################################
+# UTILITIES
+################################################################################
+
+function info() {
   file_name=$(basename "$0")
   printf "\r  [ \033[00;34mINFO\033[0m ] %s: %s\n" "$file_name" "$1"
 }
-warn() {
+function warn() {
   file_name=$(basename "$0")
   printf "\r  [ \033[0;33mWARN\033[0m ] %s: %s\n" "$file_name" "$1"
 }
-error() {
+function error() {
   file_name=$(basename "$0")
   printf "\r  [ \033[0;31mERROR\033[0m ] %s: %s\n" "$file_name" "$1"
 }
-fatal() {
+function fatal() {
   file_name=$(basename "$0")
   printf "\r  [ \033[0;31mFATAL\033[0m ] %s: %s\n" "$file_name" "$1"
   exit 1
 }
 
-# TODO: add function to check if a command was successful
+################################################################################
+# FUNCTIONS
+################################################################################
 
-refresh_pkg_cache() {
+function refresh_pkg_cache() {
   case $DISTRO in
   "arch" | "arcolinux")
-    sudo pacman -Syy --noconfirm
+    sudo pacman -Syy --noconfirm >/dev/null
     ;;
   "debian" | "ubuntu")
-    sudo apt-get update
+    sudo apt-get update >/dev/null
     ;;
   "fedora")
-    sudo dnf check-update
+    sudo dnf check-update >/dev/null
     ;;
   "alpine")
-    sudo apk update
+    sudo apk update >/dev/null
     ;;
   *)
     fatal "Distribution family $DISTRO not supported"
@@ -59,27 +69,48 @@ refresh_pkg_cache() {
   esac
 }
 
-installdeps() {
+function installdeps() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       info "Installing $dep..."
-      $PKG_MGR "$dep" || fatal "Failed to install $dep. Aborting."
+      $PKG_MGR "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
     fi
   done
 }
 
-installdeps_aur() {
+function installdeps_aur() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       info "Installing $dep..."
-      paru -S "$dep" || fatal "Failed to install $dep. Aborting."
+      paru -S "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
     fi
   done
 }
 
-detect_distro() {
+function installarchdeps() {
+  # in arcolinux, paru and yay are in the arcolinux_repo_3party repository
+  if [ "$DISTRO" = "arcolinux" ]; then
+    installdeps "paru yay"
+  else
+    if ! command -v yay >/dev/null 2>&1; then
+      info "Installing yay"
+      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
+      cd "/opt/yay" || fatal "Failed to change directory to /opt/yay. Aborting."
+      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
+    fi
+
+    if ! command -v paru >/dev/null 2>&1; then
+      info "Installing paru"
+      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
+      cd "/opt/paru" || fatal "Failed to change directory to /opt/paru. Aborting."
+      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
+    fi
+  fi
+}
+
+function detect_distro() {
   # exit early if /etc/os-release doesn't exist
   if [ ! -f /etc/os-release ]; then
     fatal "Cannot determine distribution family. Aborting."
@@ -109,7 +140,7 @@ detect_distro() {
   esac
 }
 
-create_symlinks() {
+function create_symlinks() {
   local file
 
   for file in "${FILES[@]}"; do
@@ -133,7 +164,9 @@ create_symlinks() {
   done
 }
 
-# TODO: move logic to functions
+################################################################################
+# MAIN
+################################################################################
 
 # Ask for the administrator password upfront
 sudo -v
@@ -147,45 +180,9 @@ info "Installing dependencies"
 refresh_pkg_cache
 installdeps "base-devel git zsh"
 
-# TODO: fix this step. arcolinux repo doesn't work
-# shellcheck disable=SC2154
-if [ "$DISTRO" = "arch" ]; then
+if [ "$DISTRO" = "arch" ] || [ "$DISTRO" = "arcolinux" ]; then
   info "Installing arch-specific dependencies"
-
-  # in arcolinux, paru and yay are in the arcolinux_repo_3party repository
-  if [ "$DISTRO" = "arcolinux" ]; then
-    installdeps "paru yay"
-  else
-    if ! command -v yay >/dev/null 2>&1; then
-      info "Installing yay"
-      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
-      cd "/opt/yay" || fatal "Failed to change directory to /opt/yay. Aborting."
-      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
-    fi
-
-    if ! command -v paru >/dev/null 2>&1; then
-      info "Installing paru"
-      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
-      cd "/opt/paru" || fatal "Failed to change directory to /opt/paru. Aborting."
-      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
-    fi
-  fi
-fi
-
-info "Checking dotfiles repository"
-if [ ! -d "$DEV_DIR/dotfiles" ]; then
-  info "Dotfiles repository does not exist"
-  info "Cloning..."
-  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null || fatal "Failed to clone dotfiles repository. Aborting."
-else
-  info "Dotfiles repository already exists"
-  info "Updating..."
-
-  cd "$DEV_DIR/dotfiles" || exit
-
-  ## Try to checkout main branch and pull changes. If it fails, or there are uncommitted changes, error out.
-  git checkout main >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
-  git pull >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
+  installarchdeps
 fi
 
 info "Changing default shell to zsh"
@@ -206,6 +203,21 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   fi
 else
   info "oh-my-zsh already installed"
+fi
+
+info "Checking dotfiles repository"
+if [ ! -d "$DEV_DIR/dotfiles" ]; then
+  info "Dotfiles repository does not exist"
+  info "Cloning..."
+  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null || fatal "Failed to clone dotfiles repository. Aborting."
+else
+  info "Dotfiles repository already exists"
+  info "Updating..."
+
+  cd "$DEV_DIR/dotfiles" || exit
+
+  git checkout main >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
+  git pull >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
 fi
 
 info "Creating symlinks"
