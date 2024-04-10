@@ -41,7 +41,7 @@ fatal() {
 
 refresh_pkg_cache() {
   case $DISTRO in
-  "arch")
+  "arch" | "arcolinux")
     sudo pacman -Syy --noconfirm
     ;;
   "debian" | "ubuntu")
@@ -80,36 +80,33 @@ installdeps_aur() {
 }
 
 detect_distro() {
-  local distro_var="$1"
-  if [ -f /etc/os-release ]; then
-    DISTRO=$(grep -e "^$distro_var=" /etc/os-release | cut -d'=' -f2-)
-    if [ -n "$DISTRO" ]; then
-      info "Detected distribution family: $DISTRO"
-      case $DISTRO in
-      "arch")
-        PKG_MGR="sudo pacman -S --noconfirm"
-        ;;
-      "debian" | "ubuntu")
-        PKG_MGR="sudo apt-get -y install"
-        ;;
-      "fedora")
-        PKG_MGR="sudo dnf -y install"
-        ;;
-      "alpine")
-        PKG_MGR="sudo apk add"
-        ;;
-      *)
-        error "Distribution family $DISTRO not supported"
-        return 1
-        ;;
-      esac
-      return 0
-    fi
-    warn "Cannot determine distribution family from $distro_var in /etc/os-release"
-    return 1
+  # exit early if /etc/os-release doesn't exist
+  if [ ! -f /etc/os-release ]; then
+    fatal "Cannot determine distribution family. Aborting."
   fi
 
-  fatal "Cannot determine distribution family. Aborting."
+  DISTRO=$(grep -e "^ID=" /etc/os-release | cut -d'=' -f2-)
+  if [ -z "$DISTRO" ]; then
+    fatal "Cannot determine distribution family. Aborting."
+  fi
+  info "Detected distribution family: $DISTRO"
+  case $DISTRO in
+  "arch" | "arcolinux")
+    PKG_MGR="sudo pacman -S --noconfirm"
+    ;;
+  "debian" | "ubuntu")
+    PKG_MGR="sudo apt-get -y install"
+    ;;
+  "fedora")
+    PKG_MGR="sudo dnf -y install"
+    ;;
+  "alpine")
+    PKG_MGR="sudo apk add"
+    ;;
+  *)
+    fatal "Distribution family $DISTRO not supported"
+    ;;
+  esac
 }
 
 create_symlinks() {
@@ -144,12 +141,7 @@ sudo -v
 info "Starting script"
 
 info "Detecting distribution family"
-detect_distro "ID" || {
-  # arcolinux uses ID_LIKE instead of ID
-  detect_distro "ID_LIKE" || {
-    fatal "Failed to determine distribution family."
-  }
-}
+detect_distro "ID"
 
 info "Installing dependencies"
 refresh_pkg_cache
