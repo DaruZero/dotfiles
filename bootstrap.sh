@@ -13,6 +13,7 @@
 ################################################################################
 
 DEV_DIR="$HOME/dev/DaruZero"
+OPT_DIR="$HOME/.local/opt"
 DISTRO=""
 PKG_MGR=""
 FILES=(
@@ -96,16 +97,16 @@ function installarchdeps() {
   else
     if ! command -v yay >/dev/null 2>&1; then
       info "Installing yay"
-      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
-      cd "/opt/yay" || fatal "Failed to change directory to /opt/yay. Aborting."
-      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
+      git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
+      cd "$OPT_DIR/yay" || fatal "Failed to change directory to $OPT_DIR/yay. Aborting."
+      makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
     fi
 
     if ! command -v paru >/dev/null 2>&1; then
       info "Installing paru"
-      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
-      cd "/opt/paru" || fatal "Failed to change directory to /opt/paru. Aborting."
-      sudo makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
+      git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
+      cd "$OPT_DIR/paru" || fatal "Failed to change directory to $OPT_DIR/paru. Aborting."
+      makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
     fi
   fi
 }
