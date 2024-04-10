@@ -39,6 +39,26 @@ fatal() {
 
 # TODO: add function to check if a command was successful
 
+refresh_pkg_cache() {
+  case $DISTRO in
+  "arch")
+    sudo pacman -Syy --noconfirm
+    ;;
+  "debian" | "ubuntu")
+    sudo apt-get update
+    ;;
+  "fedora")
+    sudo dnf check-update
+    ;;
+  "alpine")
+    sudo apk update
+    ;;
+  *)
+    fatal "Distribution family $DISTRO not supported"
+    ;;
+  esac
+}
+
 installdeps() {
   local deps="$1"
   for dep in $deps; do
@@ -132,6 +152,7 @@ detect_distro "ID" || {
 }
 
 info "Installing dependencies"
+refresh_pkg_cache
 installdeps "git zsh"
 
 # TODO: fix this step. arcolinux repo doesn't work
@@ -148,7 +169,7 @@ SigLevel = Required DatabaseOptional
 Server = https://arcolinux.github.io/arcolinux_repo_3party/\$arch
 EOF
 
-    sudo pacman -Syy
+    sudo pacman -Syy --noconfirm
   fi
 
   installdeps "paru yay"
