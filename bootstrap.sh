@@ -93,14 +93,14 @@ function installarchdeps() {
   else
     if ! command -v yay >/dev/null 2>&1; then
       info "  Installing yay"
-      git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
+      git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" &>/dev/null || fatal "Failed to clone yay repository. Aborting."
       cd "$OPT_DIR/yay" || fatal "Failed to change directory to $OPT_DIR/yay. Aborting."
       makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
     fi
 
     if ! command -v paru >/dev/null 2>&1; then
       info "  Installing paru"
-      git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
+      git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" &>/dev/null || fatal "Failed to clone paru repository. Aborting."
       cd "$OPT_DIR/paru" || fatal "Failed to change directory to $OPT_DIR/paru. Aborting."
       makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
     fi
@@ -206,15 +206,15 @@ info "Checking dotfiles repository"
 if [ ! -d "$DEV_DIR/dotfiles" ]; then
   info "Dotfiles repository does not exist"
   info "Cloning..."
-  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" >/dev/null || fatal "Failed to clone dotfiles repository. Aborting."
+  git clone --recurse-submodules https://github.com/DaruZero/dotfiles.git "$DEV_DIR/dotfiles" &>/dev/null || fatal "Failed to clone dotfiles repository. Aborting."
 else
   info "Dotfiles repository already exists"
   info "Updating..."
 
   cd "$DEV_DIR/dotfiles" || exit
 
-  git checkout main >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
-  git pull >/dev/null || fatal "Failed to update dotfiles repository. Aborting."
+  git checkout main &>/dev/null || fatal "Failed to update dotfiles repository. Aborting."
+  git pull &>/dev/null || fatal "Failed to update dotfiles repository. Aborting."
 fi
 
 info "Creating symlinks"
