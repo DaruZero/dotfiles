@@ -144,8 +144,8 @@ if [ "$DISTRO" = "arch" ]; then
     info "Adding arcolinux_repo_3party to pacman.conf"
     sudo tee -a /etc/pacman.conf <<EOF
 [arcolinux_repo_3party]
-SigLevel = PackageRequired DatabaseNever
-Server = https://arcolinux.github.io/arcolinux_repo_3party/$arch
+SigLevel = Required DatabaseOptional
+Server = https://arcolinux.github.io/arcolinux_repo_3party/\$arch
 EOF
 
     sudo pacman -Syy
