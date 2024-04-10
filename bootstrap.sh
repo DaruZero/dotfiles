@@ -29,20 +29,16 @@ FILES=(
 ################################################################################
 
 function info() {
-  file_name=$(basename "$0")
-  printf "\r  [ \033[00;34mINFO\033[0m ] %s: %s\n" "$file_name" "$1"
+  printf "\r  [ \033[00;34mINFO\033[0m ] %s\n" "$1"
 }
 function warn() {
-  file_name=$(basename "$0")
-  printf "\r  [ \033[0;33mWARN\033[0m ] %s: %s\n" "$file_name" "$1"
+  printf "\r  [ \033[0;33mWARN\033[0m ] %s\n" "$1"
 }
 function error() {
-  file_name=$(basename "$0")
-  printf "\r  [ \033[0;31mERROR\033[0m ] %s: %s\n" "$file_name" "$1"
+  printf "\r  [ \033[0;31mERROR\033[0m ] %s\n" "$1"
 }
 function fatal() {
-  file_name=$(basename "$0")
-  printf "\r  [ \033[0;31mFATAL\033[0m ] %s: %s\n" "$file_name" "$1"
+  printf "\r  [ \033[0;31mFATAL\033[0m ] %s\n" "$1"
   exit 1
 }
 
@@ -74,7 +70,7 @@ function installdeps() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
-      info "Installing $dep..."
+      info "  Installing $dep..."
       $PKG_MGR "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
     fi
   done
@@ -84,7 +80,7 @@ function installdeps_aur() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
-      info "Installing $dep..."
+      info "  Installing $dep..."
       paru -S "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
     fi
   done
@@ -96,14 +92,14 @@ function installarchdeps() {
     installdeps "paru yay"
   else
     if ! command -v yay >/dev/null 2>&1; then
-      info "Installing yay"
+      info "  Installing yay"
       git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" >/dev/null || fatal "Failed to clone yay repository. Aborting."
       cd "$OPT_DIR/yay" || fatal "Failed to change directory to $OPT_DIR/yay. Aborting."
       makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
     fi
 
     if ! command -v paru >/dev/null 2>&1; then
-      info "Installing paru"
+      info "  Installing paru"
       git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" >/dev/null || fatal "Failed to clone paru repository. Aborting."
       cd "$OPT_DIR/paru" || fatal "Failed to change directory to $OPT_DIR/paru. Aborting."
       makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
