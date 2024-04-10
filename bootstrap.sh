@@ -145,26 +145,31 @@ detect_distro "ID"
 
 info "Installing dependencies"
 refresh_pkg_cache
-installdeps "git zsh"
+installdeps "base-devel git zsh"
 
 # TODO: fix this step. arcolinux repo doesn't work
 # shellcheck disable=SC2154
 if [ "$DISTRO" = "arch" ]; then
   info "Installing arch-specific dependencies"
 
-  # add arcolinux_repo_3party to pacman.conf
-  if ! grep -q "arcolinux_repo_3party" /etc/pacman.conf; then
-    info "Adding arcolinux_repo_3party to pacman.conf"
-    sudo tee -a /etc/pacman.conf <<EOF
-[arcolinux_repo_3party]
-SigLevel = Required DatabaseOptional
-Server = https://arcolinux.github.io/arcolinux_repo_3party/\$arch
-EOF
+  # in arcolinux, paru and yay are in the arcolinux_repo_3party repository
+  if [ "$DISTRO" = "arcolinux" ]; then
+    installdeps "paru yay"
+  else
+    if ! command -v yay >/dev/null 2>&1; then
+      info "Installing yay"
+      sudo git clone https://aur.archlinux.org/yay.git "/opt/yay"
+      cd "/opt/yay" || exit
+      sudo makepkg -si --noconfirm
+    fi
 
-    sudo pacman -Syy --noconfirm
+    if ! command -v paru >/dev/null 2>&1; then
+      info "Installing paru"
+      sudo git clone https://aur.archlinux.org/paru.git "/opt/paru"
+      cd "/opt/paru" || exit
+      sudo makepkg -si --noconfirm
+    fi
   fi
-
-  installdeps "paru yay"
 fi
 
 info "Checking dotfiles repository"
@@ -197,7 +202,7 @@ fi
 
 info "Installing oh-my-zsh"
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  if [ "$DISTRO" = "arch" ]; then
+  if [ "$DISTRO" = "arcolinux" ]; then
     installdeps "oh-my-zsh-git"
   else
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
