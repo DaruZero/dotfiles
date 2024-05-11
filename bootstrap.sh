@@ -15,7 +15,8 @@
 DEV_DIR="$HOME/dev/DaruZero"
 OPT_DIR="$HOME/.local/opt"
 DISTRO=""
-DISTRO_LIKE=""
+DISTRO_FAMILY=""
+PKG_MGR=""
 PKG_INSTALL=""
 PKG_UPDATE=""
 FILES=(
@@ -72,7 +73,7 @@ function installdeps_aur() {
   done
 }
 
-function installarchdeps() {
+function install_aurhelper() {
   # in arcolinux, paru and yay are in the arcolinux_repo_3party repository
   if [ "$DISTRO" = "arcolinux" ]; then
     installdeps "paru yay"
@@ -93,68 +94,74 @@ function installarchdeps() {
   fi
 }
 
-function detect_distro() {
-  # exit early if /etc/os-release doesn't exist
-  if [ ! -f /etc/os-release ]; then
-    fatal "Cannot determine distribution. Aborting."
+# Function to get distribution name
+get_distribution() {
+  if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    DISTRO=$ID
+    if [ -n "$ID_LIKE" ]; then
+      DISTRO_FAMILY=$ID_LIKE
+    else
+      DISTRO_FAMILY=$ID
+    fi
+  elif type lsb_release >/dev/null 2>&1; then
+    DISTRO=$(lsb_release -si)
+    DISTRO_FAMILY=$(lsb_release -sc)
+  elif [ -f /etc/lsb-release ]; then
+    . /etc/lsb-release
+    DISTRO=$DISTRIB_ID
+    DISTRO_FAMILY=$DISTRIB_ID
+  elif [ -f /etc/debian_version ]; then
+    DISTRO="debian"
+    DISTRO_FAMILY="debian"
+  elif [ -f /etc/arch-release ]; then
+    DISTRO="arch"
+    DISTRO_FAMILY="arch"
+  elif [ -f /etc/fedora-release ]; then
+    DISTRO="fedora"
+    DISTRO_FAMILY="fedora"
+  elif [ -f /etc/alpine-release ]; then
+    DISTRO="alpine"
+    DISTRO_FAMILY="alpine"
+  else
+    DISTRO=$(uname -s)
+    DISTRO_FAMILY=$(uname -s)
   fi
 
-  # check the standard ID and return if matches
-  DISTRO=$(grep -e "^ID=" /etc/os-release | cut -d'=' -f2-)
   if [ -z "$DISTRO" ]; then
-    fatal "Cannot determine distribution. Aborting."
+    fatal "Failed to detect distribution"
   fi
+
   info "Detected distribution: $DISTRO"
-  case $DISTRO in
-  "arch")
-    PKG_INSTALL="sudo pacman -S --noconfirm"
-    PKG_UPDATE="sudo pacman -Syu --noconfirm"
-    return
-    ;;
-  "debian" | "ubuntu")
-    PKG_INSTALL="sudo apt-get -y install"
-    PKG_UPDATE="sudo apt-get update"
-    return
-    ;;
-  "fedora")
-    PKG_INSTALL="sudo dnf -y install"
-    PKG_UPDATE="sudo dnf check-update"
-    return
-    ;;
-  "alpine")
-    PKG_INSTALL="sudo apk add"
-    PKG_UPDATE="sudo apk update"
-    return
-    ;;
-  esac
 
-  warn "Distribution not recognized. Checking distribution family"
+  set_package_manager
+}
 
-  # check ID_LIKE for distribution based on other distributions
-  DISTRO_LIKE=$(grep -e "^ID_LIKE=" /etc/os-release | cut -d'=' -f2-)
-  if [ -z "$DISTRO_LIKE" ]; then
-    fatal "Cannot determine distribution family. Aborting."
-  fi
-  info "Detected distribution family: $DISTRO_LIKE"
-  case $DISTRO_LIKE in
-  *arch*)
-    PKG_INSTALL="sudo pacman -S --noconfirm"
-    PKG_UPDATE="Updatesudo dnf check-update"
+# Function to set package manager based on distribution
+set_package_manager() {
+  case "$DISTRO_FAMILY" in
+  debian | ubuntu)
+    PKG_MGR="apt-get"
+    PKG_INSTALL="sudo $PKG_MGR install -y"
+    PKG_UPDATE="sudo $PKG_MGR update"
     ;;
-  *debian* | *ubuntu*)
-    PKG_INSTALL="sudo apt-get -y install"
-    PKG_UPDATE=""
+  arch)
+    PKG_MGR="pacman"
+    PKG_INSTALL="sudo $PKG_MGR -S --noconfirm"
+    PKG_UPDATE="sudo $PKG_MGR -Sy"
     ;;
-  *fedora*)
-    PKG_INSTALL="sudo dnf -y install"
-    PKG_UPDATE="sudo dnf check-update"
+  fedora)
+    PKG_MGR="dnf"
+    PKG_INSTALL="sudo $PKG_MGR install -y"
+    PKG_UPDATE="sudo $PKG_MGR check-update"
     ;;
-  *alpine*)
-    PKG_INSTALL="sudo apk add"
-    PKG_UPDATE="sudo apk update"
+  alpine)
+    PKG_MGR="apk"
+    PKG_INSTALL="sudo $PKG_MGR add"
+    PKG_UPDATE="sudo $PKG_MGR update"
     ;;
   *)
-    fatal "Distribution family $DISTRO_LIKE not supported"
+    fatal "Unsupported distribution family: $DISTRO_FAMILY"
     ;;
   esac
 }
@@ -192,16 +199,16 @@ sudo -v
 
 info "Starting script"
 
-info "Detecting distribution family"
-detect_distro "ID"
+info "Detecting distribution"
+get_distribution
 
 info "Installing dependencies"
 refresh_pkg_cache
 installdeps "base-devel git zsh"
 
-if [ "$DISTRO" = "arch" ] || [ "$DISTRO_LIKE" = "arch" ]; then
+if [ "$DISTRO_FAMILY" = "arch" ]; then
   info "Installing arch-specific dependencies"
-  installarchdeps
+  install_aurhelper
 fi
 
 info "Changing default shell to zsh"
