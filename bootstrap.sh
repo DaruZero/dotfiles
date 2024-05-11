@@ -15,7 +15,9 @@
 DEV_DIR="$HOME/dev/DaruZero"
 OPT_DIR="$HOME/.local/opt"
 DISTRO=""
-PKG_MGR=""
+DISTRO_LIKE=""
+PKG_INSTALL=""
+PKG_UPDATE=""
 FILES=(
   ".zshrc"
   ".zprofile"
@@ -47,23 +49,7 @@ function fatal() {
 ################################################################################
 
 function refresh_pkg_cache() {
-  case $DISTRO in
-  "arch" | "arcolinux")
-    sudo pacman -Syy --noconfirm >/dev/null
-    ;;
-  "debian" | "ubuntu")
-    sudo apt-get update >/dev/null
-    ;;
-  "fedora")
-    sudo dnf check-update >/dev/null
-    ;;
-  "alpine")
-    sudo apk update >/dev/null
-    ;;
-  *)
-    fatal "Distribution family $DISTRO not supported"
-    ;;
-  esac
+  $PKG_UPDATE >/dev/null || fatal "Failed to refresh package database. Aborting."
 }
 
 function installdeps() {
@@ -71,7 +57,7 @@ function installdeps() {
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
       info "  Installing $dep..."
-      $PKG_MGR "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
+      $PKG_INSTALL "$dep" >/dev/null || fatal "Failed to install $dep. Aborting."
     fi
   done
 }
@@ -121,19 +107,23 @@ function detect_distro() {
   info "Detected distribution: $DISTRO"
   case $DISTRO in
   "arch")
-    PKG_MGR="sudo pacman -S --noconfirm"
+    PKG_INSTALL="sudo pacman -S --noconfirm"
+    PKG_UPDATE="sudo pacman -Syu --noconfirm"
     return
     ;;
   "debian" | "ubuntu")
-    PKG_MGR="sudo apt-get -y install"
+    PKG_INSTALL="sudo apt-get -y install"
+    PKG_UPDATE="sudo apt-get update"
     return
     ;;
   "fedora")
-    PKG_MGR="sudo dnf -y install"
+    PKG_INSTALL="sudo dnf -y install"
+    PKG_UPDATE="sudo dnf check-update"
     return
     ;;
   "alpine")
-    PKG_MGR="sudo apk add"
+    PKG_INSTALL="sudo apk add"
+    PKG_UPDATE="sudo apk update"
     return
     ;;
   esac
@@ -141,26 +131,30 @@ function detect_distro() {
   warn "Distribution not recognized. Checking distribution family"
 
   # check ID_LIKE for distribution based on other distributions
-  DISTRO=$(grep -e "^ID_LIKE=" /etc/os-release | cut -d'=' -f2-)
-  if [ -z "$DISTRO" ]; then
+  DISTRO_LIKE=$(grep -e "^ID_LIKE=" /etc/os-release | cut -d'=' -f2-)
+  if [ -z "$DISTRO_LIKE" ]; then
     fatal "Cannot determine distribution family. Aborting."
   fi
-  info "Detected distribution family: $DISTRO"
-  case $DISTRO in
+  info "Detected distribution family: $DISTRO_LIKE"
+  case $DISTRO_LIKE in
   *arch*)
-    PKG_MGR="sudo pacman -S --noconfirm"
+    PKG_INSTALL="sudo pacman -S --noconfirm"
+    PKG_UPDATE="Updatesudo dnf check-update"
     ;;
   *debian* | *ubuntu*)
-    PKG_MGR="sudo apt-get -y install"
+    PKG_INSTALL="sudo apt-get -y install"
+    PKG_UPDATE=""
     ;;
   *fedora*)
-    PKG_MGR="sudo dnf -y install"
+    PKG_INSTALL="sudo dnf -y install"
+    PKG_UPDATE="sudo dnf check-update"
     ;;
   *alpine*)
-    PKG_MGR="sudo apk add"
+    PKG_INSTALL="sudo apk add"
+    PKG_UPDATE="sudo apk update"
     ;;
   *)
-    fatal "Distribution family $DISTRO not supported"
+    fatal "Distribution family $DISTRO_LIKE not supported"
     ;;
   esac
 }
@@ -205,7 +199,7 @@ info "Installing dependencies"
 refresh_pkg_cache
 installdeps "base-devel git zsh"
 
-if [ "$DISTRO" = "arch" ] || [ "$DISTRO" = "arcolinux" ]; then
+if [ "$DISTRO" = "arch" ] || [ "$DISTRO_LIKE" = "arch" ]; then
   info "Installing arch-specific dependencies"
   installarchdeps
 fi
