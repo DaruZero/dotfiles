@@ -110,25 +110,53 @@ function installarchdeps() {
 function detect_distro() {
   # exit early if /etc/os-release doesn't exist
   if [ ! -f /etc/os-release ]; then
-    fatal "Cannot determine distribution family. Aborting."
+    fatal "Cannot determine distribution. Aborting."
   fi
 
+  # check the standard ID and return if matches
   DISTRO=$(grep -e "^ID=" /etc/os-release | cut -d'=' -f2-)
+  if [ -z "$DISTRO" ]; then
+    fatal "Cannot determine distribution. Aborting."
+  fi
+  info "Detected distribution: $DISTRO"
+  case $DISTRO in
+  "arch")
+    PKG_MGR="sudo pacman -S --noconfirm"
+    return
+    ;;
+  "debian" | "ubuntu")
+    PKG_MGR="sudo apt-get -y install"
+    return
+    ;;
+  "fedora")
+    PKG_MGR="sudo dnf -y install"
+    return
+    ;;
+  "alpine")
+    PKG_MGR="sudo apk add"
+    return
+    ;;
+  esac
+
+  warn "Distribution not recognized. Checking distribution family"
+
+  # check ID_LIKE for distribution based on other distributions
+  DISTRO=$(grep -e "^ID_LIKE=" /etc/os-release | cut -d'=' -f2-)
   if [ -z "$DISTRO" ]; then
     fatal "Cannot determine distribution family. Aborting."
   fi
   info "Detected distribution family: $DISTRO"
   case $DISTRO in
-  "arch" | "arcolinux")
+  *arch*)
     PKG_MGR="sudo pacman -S --noconfirm"
     ;;
-  "debian" | "ubuntu")
+  *debian* | *ubuntu*)
     PKG_MGR="sudo apt-get -y install"
     ;;
-  "fedora")
+  *fedora*)
     PKG_MGR="sudo dnf -y install"
     ;;
-  "alpine")
+  *alpine*)
     PKG_MGR="sudo apk add"
     ;;
   *)
