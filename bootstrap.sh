@@ -89,6 +89,21 @@ function install_aurhelper() {
   fi
 }
 
+function configure_repositories {
+  case $DISTRO_FAMILY in
+  debian | ubuntu)
+    # repository for eza package
+    installpkg "gpg"
+    sudo mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+    ;;
+  esac
+
+  info "Additional repositories configured"
+}
+
 # Function to get distribution name
 get_distribution() {
   if [ -f /etc/os-release ]; then
@@ -196,6 +211,9 @@ info "Starting script"
 
 info "Detecting distribution"
 get_distribution
+
+info "Setup additional repositories"
+configure_repositories
 
 info "Installing dependencies"
 refresh_pkg_cache
