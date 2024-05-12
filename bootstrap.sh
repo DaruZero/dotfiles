@@ -19,6 +19,7 @@ DISTRO_FAMILY=""
 PKG_MGR=""
 PKG_INSTALL=""
 PKG_UPDATE=""
+PKGS="https://raw.githubusercontent.com/DaruZero/dotfiles/main/pkg.txt"
 FILES=(
   ".zshrc"
   ".zprofile"
@@ -217,7 +218,12 @@ configure_repositories
 
 info "Installing dependencies"
 refresh_pkg_cache
-installpkg "git zsh"
+if [[ $PKGS == http* ]]; then
+  packages=$(curl -sSL "$PKGS")
+else
+  packages=$(cat "$PKGS")
+fi
+installpkg "$packages"
 
 if [ "$DISTRO_FAMILY" = "arch" ]; then
   info "Installing arch-specific dependencies"
