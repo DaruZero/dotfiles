@@ -1,0 +1,8 @@
+alacritty
+eza
+git
+gpg
+gzip
+neovim
+vim
+zsh
