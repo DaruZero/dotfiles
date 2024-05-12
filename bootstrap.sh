@@ -151,7 +151,7 @@ get_distribution() {
 # Function to set package manager based on distribution
 set_package_manager() {
   case "$DISTRO_FAMILY" in
-  debian | ubuntu)
+  *debian* | *ubuntu*)
     PKG_MGR="apt-get"
     PKG_INSTALL="sudo $PKG_MGR install -y"
     PKG_UPDATE="sudo $PKG_MGR update"
