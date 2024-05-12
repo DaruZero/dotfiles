@@ -53,7 +53,7 @@ function refresh_pkg_cache() {
   $PKG_UPDATE >/dev/null || fatal "Failed to refresh package database. Aborting."
 }
 
-function installdeps() {
+function installpkg() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
@@ -63,7 +63,7 @@ function installdeps() {
   done
 }
 
-function installdeps_aur() {
+function installpkg_aur() {
   local deps="$1"
   for dep in $deps; do
     if ! command -v "$dep" >/dev/null 2>&1; then
@@ -74,23 +74,18 @@ function installdeps_aur() {
 }
 
 function install_aurhelper() {
-  # in arcolinux, paru and yay are in the arcolinux_repo_3party repository
-  if [ "$DISTRO" = "arcolinux" ]; then
-    installdeps "paru yay"
-  else
-    if ! command -v yay >/dev/null 2>&1; then
-      info "  Installing yay"
-      git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" &>/dev/null || fatal "Failed to clone yay repository. Aborting."
-      cd "$OPT_DIR/yay" || fatal "Failed to change directory to $OPT_DIR/yay. Aborting."
-      makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
-    fi
+  if ! command -v yay >/dev/null 2>&1; then
+    info "  Installing yay"
+    git clone https://aur.archlinux.org/yay.git "$OPT_DIR/yay" &>/dev/null || fatal "Failed to clone yay repository. Aborting."
+    cd "$OPT_DIR/yay" || fatal "Failed to change directory to $OPT_DIR/yay. Aborting."
+    makepkg -si --noconfirm >/dev/null || fatal "Failed to install yay. Aborting."
+  fi
 
-    if ! command -v paru >/dev/null 2>&1; then
-      info "  Installing paru"
-      git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" &>/dev/null || fatal "Failed to clone paru repository. Aborting."
-      cd "$OPT_DIR/paru" || fatal "Failed to change directory to $OPT_DIR/paru. Aborting."
-      makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
-    fi
+  if ! command -v paru >/dev/null 2>&1; then
+    info "  Installing paru"
+    git clone https://aur.archlinux.org/paru.git "$OPT_DIR/paru" &>/dev/null || fatal "Failed to clone paru repository. Aborting."
+    cd "$OPT_DIR/paru" || fatal "Failed to change directory to $OPT_DIR/paru. Aborting."
+    makepkg -si --noconfirm >/dev/null || fatal "Failed to install paru. Aborting."
   fi
 }
 
@@ -204,10 +199,11 @@ get_distribution
 
 info "Installing dependencies"
 refresh_pkg_cache
-installdeps "base-devel git zsh"
+installpkg "git zsh"
 
 if [ "$DISTRO_FAMILY" = "arch" ]; then
   info "Installing arch-specific dependencies"
+  installpkg "base-devel"
   install_aurhelper
 fi
 
@@ -221,12 +217,8 @@ fi
 
 info "Installing oh-my-zsh"
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  if [ "$DISTRO" = "arcolinux" ]; then
-    installdeps "oh-my-zsh-git"
-  else
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || fatal "Failed to install oh-my-zsh. Aborting."
-    mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc" || warn "No .zshrc.pre-oh-my-zsh file found. Skipping."
-  fi
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || fatal "Failed to install oh-my-zsh. Aborting."
+  mv "$HOME/.zshrc.pre-oh-my-zsh" "$HOME/.zshrc" || warn "No .zshrc.pre-oh-my-zsh file found. Skipping."
 else
   info "oh-my-zsh already installed"
 fi
