@@ -1,13 +1,3 @@
-#  _____ ______
-# |  __ \___  /	Matteo 'DaruZero' Danelon
-# | |  | | / / 	
-# | |  | |/ /  	https://matteodanelon.com
-# | |__| / /__ 	https://github.com/DaruZero
-# |_____/_____|
-#
-# Zsh configuration
-
-
 ###########
 #  ZSHRC  #
 ###########
@@ -18,7 +8,8 @@ export ZSH_CUSTOM="$ZSH_CONFIG/custom"
 export ZSH_CACHE_DIR="$ZSH/cache"
 export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
 
-ZSH_THEME="theunraveler"
+#ZSH_THEME="theunraveler"
+ZSH_THEME="daru"
 
 # CASE_SENSITIVE="true"
 # HYPHEN_INSENSITIVE="true"
@@ -63,11 +54,33 @@ plugins=(
 	dircycle
 	docker
 	git
+	git-prompt
+  helm
+	kubectl
+	terraform
 	web-search
+	zsh-autosuggestions
 )
 
 # Completions
 [[ -f $ZSH_CONFIG/completion.zsh ]] && source $ZSH_CONFIG/completion.zsh
+
+## kubectx completions
+[[ -f $ZSH/custom/completions/_kubectx.zsh ]] && [[ -f $ZSH/custom/completions/_kubens.zsh ]] &&
+	fpath+=($ZSH/custom/completions)
+
+## Terraform
+complete -o nospace -C $(which terraform) terraform
+
+## Packer
+complete -o nospace -C $(which packer) packer
+
+## Minikube
+[[ -f $ZSH_CONFIG/completion-minikube.zsh ]] && source $ZSH_CONFIG/completion-minikube.zsh
+
+# ## Helm
+# [[ -f $ZSH_CONFIG/completion-helm.zsh ]] && [[ ! $fpath[(Ie)"$ZSH_CONFIG/completion-helm.zsh"] ]] &&
+#   fpath+=($ZSH_CONFIG/completion-helm.zsh)
 
 # Oh-My-Zsh
 [[ -f $ZSH/oh-my-zsh.sh ]] && source $ZSH/oh-my-zsh.sh
@@ -88,6 +101,9 @@ plugins=(
 
 # Common functions
 [[ -f "$XDG_CONFIG_HOME/shell-common/.functionrc" ]] && . $XDG_CONFIG_HOME/shell-common/.functionrc
+
+# Shortcuts
+[[ -f "$XDG_CONFIG_HOME/shell-common/.shortcuts" ]] && . $XDG_CONFIG_HOME/shell-common/.shortcuts
 
 # Fetch 
 # neofetch

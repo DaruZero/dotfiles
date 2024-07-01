@@ -1,0 +1,1 @@
+alias helm-mcx="nvim $HOME/dev/Alea/helm-charts"

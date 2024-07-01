@@ -1,0 +1,57 @@
+# list
+alias ls='exa -alh --icons --color=always --group-directories-first'
+alias ld='exa -lDh'
+alias lt='exa -aTh --level=2 --icons --color=always --group-directories-first'
+alias l.="exa -alh | grep -E '^\.'"
+
+# grep
+alias grep='grep --color=auto'
+alias egrep='grep -E --color=auto'
+alias fgrep='grep -F --color=auto'
+
+# fix obvious typo's
+alias cd..='cd ..'
+alias pdw='pwd'
+
+# confirm before overwriting something
+alias cp="cp -i"
+alias mv='mv -i'
+alias rm='rm -i'
+
+# adding flags
+alias df='df -h'	# human-readable sizes
+alias free='free -mt'	# show sizes in MB
+
+# ps
+alias psa="ps auxf"
+alias psgrep="ps aux | grep -v grep | grep -i -e VSZ -e"
+alias psmem='ps auxf | sort -nr -k 4'
+alias pscpu='ps auxf | sort -nr -k 3'
+
+#switch between bash and zsh
+alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
+alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+alias tofish="sudo chsh $USER -s /bin/fish && echo 'Now log out.'"
+
+# git
+alias gad='git add'		# add files
+alias gaa='git add .'		# add all
+alias gbm='git switch main'	# switch to main branch
+alias gb='git branch'		# branch
+alias gco='git checkout'	# checkout
+alias gcl='git clone' 		# clone
+alias gcm='git commit -m'	# commit with message
+alias gcma='git commit -am'	# commit add with message
+alias gf='git fetch'		# fetch
+alias gpl='git pull'		# pull
+alias gps='git push'		# push
+alias gst='git status'		# status
+alias gt='git tag'		# tag
+alias gts='git tag -s'		# signed tag
+
+# misc
+alias :q='exit'
+
+# shortcuts
+alias dev-helm='nvim ~/dev/Alea/alea/mcx/modules/mcx_buildtools/scripts/src/helm'
+alias notes='nvim ~/Documents/notes'
