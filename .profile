@@ -1,12 +1,16 @@
 #  _____ ______
-# |  __ \___  /	Matteo 'DaruZero' Danelon
+# |  __ \___  / Matteo 'DaruZero' Danelon
 # | |  | | / /
-# | |  | |/ /  	https://matteodanelon.com
-# | |__| / /__ 	https://github.com/DaruZero
+# | |  | |/ /   https://matteodanelon.com
+# | |__| / /__  https://github.com/DaruZero
 # |_____/_____|
 #
-# Generic shell config
+# Common profile. Contains env vars, options,
+# scripts and anything else useful for all shells
 
+###############
+#  VARIABLES  #
+###############
 
 # user scripts
 export PATH="$HOME/.bin:$PATH"
@@ -21,8 +25,10 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # history
 export HISTCONTROL=ignoreboth:erasedups
 export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history| cd -| cd ..)"
+export HISTSIZE=5000
+export HISTFILESIZE=5000
 
-# terminal 
+# terminal
 export TERMINAL='alacritty'
 export TERM='xterm-256color'
 
@@ -33,21 +39,42 @@ export EDITOR='vim'
 # gpg
 export GPG_TTY="$(tty)"
 
-# misc
-export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
+# other
 export PAGER='less'
+[ -n "$DISPLAY" ] &&
+  export BROWSER=brave ||
+  export BROWSER=lynx
+
+###############
+#  RESOURCES  #
+###############
+
+# aliases
+if [[ -d "$XDG_CONFIG_HOME/shell-common/alias.d" ]]; then
+  for f in $XDG_CONFIG_HOME/shell-common//alias.d; do
+    . $f
+  done
+fi
+
+# functions
+if [[ -d "$XDG_CONFIG_HOME/shell-common/function.d" ]]; then
+  for f in $XDG_CONFIG_HOME/shell-common//function.d; do
+    . $f
+  done
+fi
+
+# misc
+export DISTRO=$(get_distribution | grep -e '^DISTRO=' | cut -d'=' -f2)
+export DISTRO_FAMILY=$(get_distribution | grep -e '^DISTRO_LIKE=' | cut -d'=' -f2)
+
+###############
+#  OPTIONALS  #
+###############
 
 # rust
-[[ -x "$(command -v rustc --version)" ]] && 
-    . "$HOME/.cargo/env"
+[[ -x "$(command -v rustc --version)" ]] &&
+  . "$HOME/.cargo/env"
 
 # snap
-[[ -x "$(command -v snap)" ]] && 
-    export PATH="/snap/bin:$PATH"
-
-# Change keyboard layout for specific keyboards
-apex_m750=$(
-	xinput list |
-	sed -n 's/.*Apex M750.*id=\([0-9]*\).*keyboard.*/\1/p'
-)
-[ ! -z "$apex_m750+x" ] && setxkbmap -device $apex_m750 -layout us,it -variant intl, -option grp:ctrl_shift_toggle
+[[ -x "$(command -v snap)" ]] &&
+  export PATH="/snap/bin:$PATH"

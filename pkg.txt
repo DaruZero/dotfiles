@@ -1,8 +1,15 @@
 alacritty
+bat
 eza
+fzf
 git
 gpg
 gzip
+lynx
 neovim
+rar
+ripgrep
+tar
 vim
+zip
 zsh

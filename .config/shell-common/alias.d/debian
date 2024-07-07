@@ -1,0 +1,21 @@
+#  _____ ______
+# |  __ \___  / Matteo 'DaruZero' Danelon
+# | |  | | / /
+# | |  | |/ /   https://matteodanelon.com
+# | |__| / /__  https://github.com/DaruZero
+# |_____/_____|
+#
+# Collection of debian-specific aliases
+
+if [[ $DISTRO_FAMILY != 'debian' ]]; then; return; fi
+
+# packages
+alias apt="sudo apt"                                  # always use sudo with apt
+alias update='sudo apt update && sudo apt upgrade -y' # update standard pkgs
+alias pkg-install='sudo apt install'                  # install pkg
+alias pkg-uninstall='sudo apt remove'                 # uninstall pkg
+alias pkg-search='apt search'                         # search pkg
+alias pkg-search-installed='apt list --installed'     # search installed pkg
+alias pkg-info='apt show'                             # list pkg info
+# alias unlock=''                                     # remove apt lock
+alias cleanup='apt autoclean && apt autoremove -y'    # remove orphaned packages

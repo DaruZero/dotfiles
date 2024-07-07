@@ -1,0 +1,27 @@
+#  _____ ______
+# |  __ \___  / Matteo 'DaruZero' Danelon
+# | |  | | / /
+# | |  | |/ /   https://matteodanelon.com
+# | |__| / /__  https://github.com/DaruZero
+# |_____/_____|
+#
+# Collection of archlinux-specific aliases
+
+if [[ $DISTRO_FAMILY != 'arch' ]]; then; return; fi
+
+# packages
+alias pacman="sudo pacman --color auto"                   # always use sudo with pacman
+alias update='sudo pacman --color auto -Syu --noconfirm'  # update standard pkgs
+alias upall='paru --color auto -Syu --noconfirm'          # update standard and AUR pkgs
+alias pkg-install='paru --color auto -S'                  # install pkg
+alias pkg-uninstall='paru --color auto -Rsc'              # uninstall pkg
+alias pkg-search='paru --color auto -Ss'                  # search pkg
+alias pkg-search-installed='paru --color auto -Qs'        # search installed pkg
+alias pkg-info='paru --color auto -Qii'                   # list pkg info
+alias unlock='sudo rm /var/lib/pacman/db.lck'             # remove pacman lock
+alias cleanup='sudo pacman -Rns $(pacman -Qtdq)'          # remove orphaned packages
+
+# get fastest mirrors
+alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
+
+

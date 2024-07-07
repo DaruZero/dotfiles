@@ -1,8 +1,8 @@
 #  _____ ______
-# |  __ \___  /	Matteo 'DaruZero' Danelon
-# | |  | | / / 	
-# | |  | |/ /  	https://matteodanelon.com
-# | |__| / /__ 	https://github.com/DaruZero
+# |  __ \___  / Matteo 'DaruZero' Danelon
+# | |  | | / /
+# | |  | |/ /   https://matteodanelon.com
+# | |__| / /__  https://github.com/DaruZero
 # |_____/_____|
 #
 # Useful functions
@@ -79,8 +79,29 @@ bak() {
 # restore local backup
 resbak() {
 	if [[ -e "$1" && $1 == *.bak ]]; then
-		local filename=$(echo $1 | sed 's/.bak//g') 
+		local filename=${$1/%.bak/}
 		command cp "$1" $filename
 		echo "Restored $1 into $filename"
 	fi
 }
+
+# print distribution and distribution family
+get_distribution() {
+  if [ -f /etc/os-release ]; then
+    echo "DISTRO=$(grep -e '^ID=' /etc/os-release | cut -d'=' -f2)"
+    echo "DISTRO_FAMILY=$(grep -e '^ID_LIKE=' /etc/os-release | cut -d'=' -f2')"
+  fi
+}
+
+# print the 20 most used commands
+function shell_stats() {
+  fc -l 1 \
+    | awk '{ CMD[$2]++; count++; } END { for (a in CMD) print CMD[a] " " CMD[a]*100/count "% " a }' \
+    | grep -v "./" | sort -nr | head -n 20 | column -c3 -s " " -t | nl
+}
+
+# make a directoty and cd into it
+function mkcd takedir() {
+  mkdir -p $@ && cd ${@:$#}
+}
+
