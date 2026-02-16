@@ -1,13 +1,3 @@
-#  _____ ______
-# |  __ \___  /	Matteo 'DaruZero' Danelon
-# | |  | | / /
-# | |  | |/ /  	https://matteodanelon.com
-# | |__| / /__ 	https://github.com/DaruZero
-# |_____/_____|
-#
-# Generic shell config
-
-
 # user scripts
 export PATH="$HOME/.bin:$PATH"
 export PATH="$HOME/.bin/ascii-art:$PATH"
@@ -22,7 +12,7 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export HISTCONTROL=ignoreboth:erasedups
 export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history| cd -| cd ..)"
 
-# terminal 
+# terminal
 export TERMINAL='alacritty'
 export TERM='xterm-256color'
 
@@ -37,17 +27,17 @@ export GPG_TTY="$(tty)"
 export DISTRO_FAMILY=$(awk '/ID_LIKE/' /etc/os-release | sed 's/ID_LIKE=//g')
 export PAGER='less'
 
-# rust
-[[ -x "$(command -v rustc --version)" ]] && 
-    . "$HOME/.cargo/env"
-
 # snap
-[[ -x "$(command -v snap)" ]] && 
-    export PATH="/snap/bin:$PATH"
+[[ -x "$(command -v snap)" ]] &&
+  export PATH="/snap/bin:$PATH"
 
-# Change keyboard layout for specific keyboards
-apex_m750=$(
-	xinput list |
-	sed -n 's/.*Apex M750.*id=\([0-9]*\).*keyboard.*/\1/p'
-)
-[ ! -z "$apex_m750+x" ] && setxkbmap -device $apex_m750 -layout us,it -variant intl, -option grp:ctrl_shift_toggle
+# krew - kubectl plugin manager
+[[ -d $HOME/.krew ]] &&
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# rust
+. "$HOME/.cargo/env"
+
+# go
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"

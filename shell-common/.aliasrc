@@ -52,6 +52,4 @@ alias gts='git tag -s'		# signed tag
 # misc
 alias :q='exit'
 
-# shortcuts
-alias dev-helm='nvim ~/dev/Alea/alea/mcx/modules/mcx_buildtools/scripts/src/helm'
-alias notes='nvim ~/Documents/notes'
+alias sys-update="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y"

@@ -1,0 +1,34 @@
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+[init]
+	defaultBranch = main
+[user]
+	email = ""
+	name = Matteo Danelon
+	signingKey = ""
+[push]
+	autoSetupRemote = true
+	followTags = true
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
+	updateRefs = true
+
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true      # use n and N to move between diff sections
+    line-numbers = true  # display line numbers
+    hyperlinks = true    # turn line numbers, file paths, commit hashes, etc into clickable links
+    side-by-side = true  # 
+
+[merge]
+    conflictstyle = zdiff3
+

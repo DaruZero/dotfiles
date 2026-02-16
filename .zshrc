@@ -53,9 +53,11 @@ plugins=(
 	copyfile
 	dircycle
 	docker
+	fzf
 	git
 	git-prompt
-  helm
+	helm
+	kind
 	kubectl
 	terraform
 	web-search
@@ -64,6 +66,9 @@ plugins=(
 
 # Completions
 [[ -f $ZSH_CONFIG/completion.zsh ]] && source $ZSH_CONFIG/completion.zsh
+for file in "$ZSH_CONFIG"/completion-*.zsh; do
+  source "$file"
+done
 
 ## kubectx completions
 [[ -f $ZSH/custom/completions/_kubectx.zsh ]] && [[ -f $ZSH/custom/completions/_kubens.zsh ]] &&
@@ -71,12 +76,13 @@ plugins=(
 
 ## Terraform
 complete -o nospace -C $(which terraform) terraform
+complete -o nospace -C /usr/bin/tofu tofu
 
 ## Packer
 complete -o nospace -C $(which packer) packer
 
 ## Minikube
-[[ -f $ZSH_CONFIG/completion-minikube.zsh ]] && source $ZSH_CONFIG/completion-minikube.zsh
+#[[ -f $ZSH_CONFIG/completion-minikube.zsh ]] && source $ZSH_CONFIG/completion-minikube.zsh
 
 # ## Helm
 # [[ -f $ZSH_CONFIG/completion-helm.zsh ]] && [[ ! $fpath[(Ie)"$ZSH_CONFIG/completion-helm.zsh"] ]] &&
@@ -107,3 +113,13 @@ complete -o nospace -C $(which packer) packer
 
 # Fetch 
 # neofetch
+
+autoload -U +X bashcompinit && bashcompinit
+export PATH="$PATH:/home/matteo.danelon@aleasrl.com/.nsccli/bin"
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

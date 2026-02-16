@@ -1,0 +1,13 @@
+services:
+  "gitlab-new.alea.srl": "gitlab:gitlab-new.alea.srl"
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+  commit:
+    signOff: true
+  overrideGpg: true
+  mainBranches:
+    - master
+    - main
+    - develop
